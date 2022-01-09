@@ -37,6 +37,7 @@ namespace Client {
       var bytesRead = _pipeClient.EndRead(ar);
       var serializedMessage = new ArraySegment<byte>(_buffer, 0, bytesRead);
 
+      BeginRead();
       Received(serializedMessage.Array!);
     }
   }
