@@ -8,11 +8,14 @@
     /// Item sendo manipulado
     /// </summary>
     public long ItemId { get; set; }
+  }
 
+  [Serializable]
+  public abstract class BaseClientItemMessage : BaseItemMessage {
     /// <summary>
     /// Quando esta mensagem for recebida, este método é executado
     /// </summary>
     /// <param name="transporter">Tranporte atual (pode ser client ou server, não faz diferença)</param>
-    public abstract void Invoke(BaseTransporter transporter);
+    public abstract void Invoke(BaseTransporter transporter, long itemId);
   }
 }

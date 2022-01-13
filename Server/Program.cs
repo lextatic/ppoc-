@@ -1,4 +1,5 @@
 ﻿using CustomSerializer;
+using GameEntities;
 using GameEntities.Messages;
 using NamedPipesTransporter;
 using TypeManager;
@@ -17,12 +18,15 @@ TypeManagerTabajara.RegisterClass<RequestBallColorMessage>();
 
 Console.WriteLine("Server iniciado. Pressione [C] para parar.");
 
+// Criando memória do jogo (REDIS)
+var gameMemory = new GameMemory();
+
 transporter.MessageReceived += (sender, e) => {
   Console.ForegroundColor = ConsoleColor.Magenta;
   Console.Write("Mensagem recebida: ");
   Console.ForegroundColor = ConsoleColor.White;
   Console.WriteLine(e.Message.GetType().FullName);
-  e.Message.Invoke(transporter);
+  e.Message.Invoke(transporter, gameMemory);
 };
 
 SpinWait.SpinUntil(() => {

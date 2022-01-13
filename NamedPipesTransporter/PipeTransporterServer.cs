@@ -1,4 +1,4 @@
-﻿using Messages;
+﻿using GameEntities;
 using System.IO.Pipes;
 
 namespace NamedPipesTransporter {

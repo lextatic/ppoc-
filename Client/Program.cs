@@ -1,9 +1,7 @@
 ﻿using CustomSerializer;
 using GameEntities;
-using GameEntities.Items;
 using GameEntities.Messages;
 using NamedPipesTransporter;
-using System.Collections.Concurrent;
 using TypeManager;
 
 // PoG: Aguarda 1 segundo para dar tempo do server subir.
@@ -18,34 +16,27 @@ using var transporter = new PipeTransporterClient(serializer);
 TypeManagerTabajara.RegisterClass<ChangeBallColorMessage>();
 TypeManagerTabajara.RegisterClass<RequestBallColorMessage>();
 
-// Crio 4 bolas com IDs aleatórios e coloco na memória
-var gameItems = new ConcurrentDictionary<long, BaseItem>();
+// Criando 3 bolas
+var rand = new Random(DateTime.Now.Millisecond);
+var ball1 = new Ball { Id = rand.NextInt64(), Color = (int)ConsoleColor.White };
+var ball2 = new Ball { Id = rand.NextInt64(), Color = (int)ConsoleColor.White };
+var ball3 = new Ball { Id = rand.NextInt64(), Color = (int)ConsoleColor.White };
 
-InitializeBalls(gameItems);
+// Criando memória do jogo (local somente (ou REDIS readonly talvez))
+var gameMemory = new GameMemory();
+
+// Adicionando bolas à memória do jogo
+gameMemory.Put(ball1);
+gameMemory.Put(ball2);
+gameMemory.Put(ball3);
 
 // Escutando mensagens chegando
 transporter.MessageReceived += (sender, e) => {
-  // TODO: Aqui precisamos fazer com que os "scripts" tenham acesso aos itens do client
-  // Como não estramos trabalhando com Unity e temos apenas um tipo de mensagem,
-  // vamos manipulá-la manualmente.
-  {
-    var mockMessage = e.Message;
-
-    if(gameItems.TryGetValue(mockMessage.ItemId, out var ball)) {
-      ((Ball)ball).Color = ((ChangeBallColorMessage)e.Message).Color;
-    }
-
-    // Se fossemos ter scripts client-side (o que seria correto), esta linha invocaria o
-    // script da mensagem (lá deveriamos ter alguma forma de ter acesso à memória do jogo).
-    // e.Message.Invoke(transporter);
-
-    // A memória é algo que deveria ser injetado da mesma forma que o restante de tudo nesta poc
-  }
-
-  DumpBallsState(gameItems);
+  e.Message.Invoke(transporter, gameMemory);
+  DumpBallsState(gameMemory);
 };
 
-DumpBallsState(gameItems);
+DumpBallsState(gameMemory);
 
 // MainLoop
 SpinWait.SpinUntil(() => {
@@ -56,27 +47,19 @@ SpinWait.SpinUntil(() => {
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Bola 1 selecionada");
       Console.ResetColor();
-      transporter.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(0) });
+      transporter.Send(new RequestBallColorMessage { ItemId = ball1.Id });
       return false;
     case ConsoleKey.D2:
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Bola 2 selecionada");
       Console.ResetColor();
-      transporter.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(1) });
+      transporter.Send(new RequestBallColorMessage { ItemId = ball2.Id });
       return false;
     case ConsoleKey.D3:
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Bola 3 selecionada");
       Console.ResetColor();
-      transporter.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(2) });
-      return false;
-    case ConsoleKey.A:
-      Console.ForegroundColor = ConsoleColor.Green;
-      Console.Write("Todas as bolas selecionadas");
-      Console.ResetColor();
-      transporter.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(0) });
-      transporter.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(1) });
-      transporter.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(2) });
+      transporter.Send(new RequestBallColorMessage { ItemId = ball3.Id });
       return false;
     case ConsoleKey.C:
       Console.ForegroundColor = ConsoleColor.Magenta;
@@ -94,18 +77,7 @@ SpinWait.SpinUntil(() => {
 // Server finalizado
 Console.WriteLine("Server is closing.");
 
-static void InitializeBalls(ConcurrentDictionary<long, BaseItem> gameItems) {
-  var rand = new Random(DateTime.Now.Millisecond);
-  var ball1 = new Ball { Id = rand.NextInt64(), Color = (int)ConsoleColor.White };
-  var ball2 = new Ball { Id = rand.NextInt64(), Color = (int)ConsoleColor.White };
-  var ball3 = new Ball { Id = rand.NextInt64(), Color = (int)ConsoleColor.White };
-
-  gameItems[ball1.Id] = ball1;
-  gameItems[ball2.Id] = ball2;
-  gameItems[ball3.Id] = ball3;
-}
-
-static void DumpBallsState(ConcurrentDictionary<long, BaseItem> gameItems) {
+static void DumpBallsState(GameMemory gameMemory) {
   Console.ForegroundColor = ConsoleColor.Yellow;
   Console.WriteLine("Seja bem vindo ao Bolas Action MMO!");
   Console.WriteLine();
@@ -115,7 +87,7 @@ static void DumpBallsState(ConcurrentDictionary<long, BaseItem> gameItems) {
 
   int ballIndex = 1;
 
-  foreach (var kv in gameItems) {
+  foreach (var kv in gameMemory._items) {
     Console.ForegroundColor = ConsoleColor.Gray;
     Console.Write("Bola #");
     Console.ForegroundColor = ConsoleColor.White;

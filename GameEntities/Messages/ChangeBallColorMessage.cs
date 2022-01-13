@@ -1,6 +1,4 @@
-﻿using Messages;
-
-namespace GameEntities.Messages {
+﻿namespace GameEntities.Messages {
   /// <summary>
   /// Mensagem recebida com ordem de trocar a cor da bola
   /// </summary>
@@ -8,8 +6,12 @@ namespace GameEntities.Messages {
   public class ChangeBallColorMessage : BaseItemMessage {
     public byte Color { get; set; }
 
-    public override void Invoke(BaseTransporter transporter) {
-      Console.WriteLine("TO AQUI ChangeBallColorMessage!");
+    public override void Invoke(BaseTransporter transporter, GameMemory gm) {
+      var ball = gm.Get<Ball>(ItemId);
+
+      if (ball != null) {
+        ball.Color = Color;
+      }
     }
   }
 }

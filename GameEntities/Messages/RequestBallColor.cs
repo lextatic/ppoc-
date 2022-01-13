@@ -1,6 +1,4 @@
-﻿using Messages;
-
-namespace GameEntities.Messages {
+﻿namespace GameEntities.Messages {
   /// <summary>
   /// Um client está requerendo uma nova cor para uma bola
   /// </summary>
@@ -8,7 +6,7 @@ namespace GameEntities.Messages {
   public class RequestBallColorMessage : BaseItemMessage {
     private static readonly Random _random = new(DateTime.Now.Millisecond);
 
-    public override void Invoke(BaseTransporter transport) {
+    public override void Invoke(BaseTransporter transport, GameMemory gm) {
       var color = (byte)_random.Next(0, 16);
 
       Console.ForegroundColor = ConsoleColor.Cyan;
