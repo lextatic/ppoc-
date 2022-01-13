@@ -6,9 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\PoCAbstractions\PoCAbstractions.csproj" />
-    <ProjectReference Include="..\TypeManager\TypeManager.csproj" />
-  </ItemGroup>
-
 </Project>

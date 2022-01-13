@@ -15,6 +15,7 @@
     <ProjectReference Include="..\CustomSerializer\CustomSerializer.csproj" />
     <ProjectReference Include="..\GameEntities\GameEntities.csproj" />
     <ProjectReference Include="..\PoCAbstractions\PoCAbstractions.csproj" />
+    <ProjectReference Include="..\TypeManager\TypeManager.csproj" />
   </ItemGroup>
 
 </Project>

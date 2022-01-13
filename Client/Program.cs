@@ -2,7 +2,11 @@
 using CustomSerializer;
 using GameEntities;
 using GameEntities.Items;
+using GameEntities.PoC;
 using System.Collections.Concurrent;
+
+// PoG: Aguarda 1 segundo para dar tempo do server subir.
+Thread.Sleep(1000);
 
 // TODO: Utilizar injetor de dependência
 var serializer = new CustomJsonSerialize();
@@ -27,25 +31,25 @@ SpinWait.SpinUntil(() => {
   switch (keyInfo.Key) {
     case ConsoleKey.D1:
       Console.ForegroundColor = ConsoleColor.Green;
-      Console.Write($"{new string(' ', Console.WindowWidth - 1)}\rBola 1 selecionada\r");
+      Console.WriteLine("Bola 1 selecionada");
       Console.ResetColor();
       transport.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(0) });
       return false;
     case ConsoleKey.D2:
       Console.ForegroundColor = ConsoleColor.Green;
-      Console.Write($"{new string(' ', Console.WindowWidth - 1)}\rBola 2 selecionada\r");
+      Console.WriteLine("Bola 2 selecionada");
       Console.ResetColor();
       transport.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(1) });
       return false;
     case ConsoleKey.D3:
       Console.ForegroundColor = ConsoleColor.Green;
-      Console.Write($"{new string(' ', Console.WindowWidth - 1)}\rBola 3 selecionada\r");
+      Console.WriteLine("Bola 3 selecionada");
       Console.ResetColor();
       transport.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(2) });
       return false;
     case ConsoleKey.A:
       Console.ForegroundColor = ConsoleColor.Green;
-      Console.Write($"{new string(' ', Console.WindowWidth - 1)}\rTodas as bolas selecionadas\r");
+      Console.Write("Todas as bolas selecionadas");
       Console.ResetColor();
       transport.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(0) });
       transport.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(1) });
@@ -53,7 +57,7 @@ SpinWait.SpinUntil(() => {
       return false;
     case ConsoleKey.C:
       Console.ForegroundColor = ConsoleColor.Magenta;
-      Console.WriteLine($"{new string(' ', Console.WindowWidth - 1)}\rÉ... vá jogar LoL... vc é muito ruim pra jogar Bolas Action MMO!\r");
+      Console.WriteLine("É... vá jogar LoL... vc é muito ruim pra jogar Bolas Action MMO!");
       Console.ResetColor();
       return true;
     default:

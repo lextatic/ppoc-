@@ -6,7 +6,7 @@ using System.Security.Principal;
 namespace Client {
   public class PipeTransporterClient : BaseTransporter {
     public PipeTransporterClient(BaseSerializer serializer) : base(serializer) {
-      _pipeClient = new(".", "ppoc_pipe", PipeDirection.InOut, PipeOptions.None, TokenImpersonationLevel.Impersonation);
+      _pipeClient = new(".", "ppoc_pipe", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation);
       Console.WriteLine("Conectando a ./ppoc_pipe...");
       _pipeClient.Connect();
       BeginRead();
@@ -16,7 +16,9 @@ namespace Client {
     private readonly byte[] _buffer = new byte[65536];
 
     protected override void OnSend(byte[] serializedMessage) {
+      Console.Write($"Enviado: {serializedMessage.Length:N0} bytes...");
       _pipeClient.Write(serializedMessage);
+      Console.WriteLine(" DONE");
     }
 
     public override void Dispose() {
@@ -26,10 +28,7 @@ namespace Client {
     }
 
     private void BeginRead() {
-      if (_pipeClient.IsConnected == false) {
-        return;
-      }
-
+      SpinWait.SpinUntil(() => _pipeClient.IsConnected);
       _pipeClient.BeginRead(_buffer, 0, _buffer.Length, OnPipeRead, null);
     }
 
@@ -39,6 +38,7 @@ namespace Client {
 
       BeginRead();
       Received(serializedMessage.Array!);
+      Console.WriteLine($"Recebido: {bytesRead:N0} bytes");
     }
   }
 }
