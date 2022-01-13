@@ -1,16 +1,22 @@
-﻿using Client;
-using CustomSerializer;
+﻿using CustomSerializer;
 using GameEntities;
 using GameEntities.Items;
-using GameEntities.PoC;
+using GameEntities.Messages;
+using NamedPipesTransporter;
 using System.Collections.Concurrent;
+using TypeManager;
 
 // PoG: Aguarda 1 segundo para dar tempo do server subir.
 Thread.Sleep(1000);
 
 // TODO: Utilizar injetor de dependência
 var serializer = new CustomJsonSerialize();
-using var transport = new PipeTransporterClient(serializer);
+using var transporter = new PipeTransporterClient(serializer);
+
+// Talvez o injetor de dependências seja capaz de resolver tipos por nome
+// Mas, em qualquer caso, vai uma implementação porca:
+TypeManagerTabajara.RegisterClass<ChangeBallColorMessage>();
+TypeManagerTabajara.RegisterClass<RequestBallColorMessage>();
 
 // Crio 4 bolas com IDs aleatórios e coloco na memória
 var gameItems = new ConcurrentDictionary<long, BaseItem>();
@@ -18,7 +24,24 @@ var gameItems = new ConcurrentDictionary<long, BaseItem>();
 InitializeBalls(gameItems);
 
 // Escutando mensagens chegando
-transport.MessageReceived += (sender, args) => {
+transporter.MessageReceived += (sender, e) => {
+  // TODO: Aqui precisamos fazer com que os "scripts" tenham acesso aos itens do client
+  // Como não estramos trabalhando com Unity e temos apenas um tipo de mensagem,
+  // vamos manipulá-la manualmente.
+  {
+    var mockMessage = e.Message;
+
+    if(gameItems.TryGetValue(mockMessage.ItemId, out var ball)) {
+      ((Ball)ball).Color = ((ChangeBallColorMessage)e.Message).Color;
+    }
+
+    // Se fossemos ter scripts client-side (o que seria correto), esta linha invocaria o
+    // script da mensagem (lá deveriamos ter alguma forma de ter acesso à memória do jogo).
+    // e.Message.Invoke(transporter);
+
+    // A memória é algo que deveria ser injetado da mesma forma que o restante de tudo nesta poc
+  }
+
   DumpBallsState(gameItems);
 };
 
@@ -33,27 +56,27 @@ SpinWait.SpinUntil(() => {
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Bola 1 selecionada");
       Console.ResetColor();
-      transport.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(0) });
+      transporter.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(0) });
       return false;
     case ConsoleKey.D2:
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Bola 2 selecionada");
       Console.ResetColor();
-      transport.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(1) });
+      transporter.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(1) });
       return false;
     case ConsoleKey.D3:
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Bola 3 selecionada");
       Console.ResetColor();
-      transport.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(2) });
+      transporter.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(2) });
       return false;
     case ConsoleKey.A:
       Console.ForegroundColor = ConsoleColor.Green;
       Console.Write("Todas as bolas selecionadas");
       Console.ResetColor();
-      transport.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(0) });
-      transport.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(1) });
-      transport.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(2) });
+      transporter.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(0) });
+      transporter.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(1) });
+      transporter.Send(new RequestBallColorMessage { ItemId = gameItems.Keys.ElementAt(2) });
       return false;
     case ConsoleKey.C:
       Console.ForegroundColor = ConsoleColor.Magenta;

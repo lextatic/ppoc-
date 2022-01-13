@@ -1,11 +1,11 @@
 ﻿using CustomSerializer;
-using GameEntities.PoC;
-using Server;
+using GameEntities.Messages;
+using NamedPipesTransporter;
 using TypeManager;
 
 // TODO: Utilizar injetor de dependência
 var serializer = new CustomJsonSerialize();
-using var transport = new PipeTransporterServer(serializer);
+using var transporter = new PipeTransporterServer(serializer);
 
 // TODO: ObjectPool pra tudo!!! Diferentemente de RunUO, não podemos ter instâncias em memória o tempo todo
 // Então é importante ter object pool para reaproveitar objetos sem precisar aguardar o GC!!!
@@ -16,6 +16,14 @@ TypeManagerTabajara.RegisterClass<ChangeBallColorMessage>();
 TypeManagerTabajara.RegisterClass<RequestBallColorMessage>();
 
 Console.WriteLine("Server iniciado. Pressione [C] para parar.");
+
+transporter.MessageReceived += (sender, e) => {
+  Console.ForegroundColor = ConsoleColor.Magenta;
+  Console.Write("Mensagem recebida: ");
+  Console.ForegroundColor = ConsoleColor.White;
+  Console.WriteLine(e.Message.GetType().FullName);
+  e.Message.Invoke(transporter);
+};
 
 SpinWait.SpinUntil(() => {
   var keyInfo = Console.ReadKey(true);

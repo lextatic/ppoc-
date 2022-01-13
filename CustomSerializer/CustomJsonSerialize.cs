@@ -1,10 +1,12 @@
 ﻿using Messages;
-using PoCAbstractions.Serialization;
 using System.Text;
 using System.Text.Json;
 using TypeManager;
 
 namespace CustomSerializer {
+  /// <summary>
+  /// Serializador custom que injeta o nome do tipo sendo manipulado
+  /// </summary>
   public class CustomJsonSerialize : BaseSerializer {
     public override byte[] Serialize(BaseItemMessage obj) {
       var message = $"{obj.GetType().FullName}\r\n{JsonSerializer.Serialize<object>(obj, new JsonSerializerOptions { WriteIndented = true })}";
