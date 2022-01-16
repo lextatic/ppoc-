@@ -1,0 +1,17 @@
+{
+    "name": "CustomSerializer",
+    "rootNamespace": "",
+    "references": [
+        "GUID:8198cb0f08d256f47895b1e4ebe6b80a",
+        "GUID:165d0c69a960fb94caa9615b03d62472"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
