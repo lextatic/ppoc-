@@ -1,4 +1,6 @@
-﻿namespace GameEntities {
+﻿using System;
+
+namespace GameEntities {
   /// <summary>
   /// Classe de transporte (aka "rede").
   /// </summary>
