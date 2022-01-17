@@ -20,12 +20,14 @@ namespace CustomSerializer
 
 		public override BaseItemMessage Deserialize(byte[] serializedMessage)
 		{
-			using var textReader = new StringReader(Encoding.UTF8.GetString(serializedMessage!));
-			var messageTypeName = textReader.ReadLine()!;
-			var messageContents = textReader.ReadToEnd();
-			var messageType = TypeManagerTabajara.Get(messageTypeName);
+			using (var textReader = new StringReader(Encoding.UTF8.GetString(serializedMessage)))
+			{
+				var messageTypeName = textReader.ReadLine();
+				var messageContents = textReader.ReadToEnd();
+				var messageType = TypeManagerTabajara.Get(messageTypeName);
 
-			return (BaseItemMessage)JsonConvert.DeserializeObject(messageContents, messageType)!;
+				return (BaseItemMessage)JsonConvert.DeserializeObject(messageContents, messageType);
+			}
 		}
 	}
 }

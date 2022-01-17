@@ -8,7 +8,7 @@ namespace TypeManager
 	/// </summary>
 	public static class TypeManagerTabajara
 	{
-		private static readonly Dictionary<string, Type> _registry = new();
+		private static readonly Dictionary<string, Type> _registry = new Dictionary<string, Type>();
 
 		/// <summary>
 		/// Registra uma classe para ser localizada via nome.
@@ -18,7 +18,7 @@ namespace TypeManager
 		{
 			var type = typeof(T);
 
-			_registry.Add(type.FullName!, type);
+			_registry.Add(type.FullName, type);
 		}
 
 		/// <summary>

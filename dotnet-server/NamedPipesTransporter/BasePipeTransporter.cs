@@ -10,7 +10,7 @@ namespace NamedPipesTransporter
 	/// </summary>
 	public class BasePipeTransporter : BaseTransporter
 	{
-		protected PipeStream? _pipeStream;
+		protected PipeStream _pipeStream;
 		protected readonly byte[] _buffer = new byte[65536];
 
 		public BasePipeTransporter(BaseSerializer serializer) : base(serializer)
@@ -26,22 +26,22 @@ namespace NamedPipesTransporter
 
 		public override void Dispose()
 		{
-			_pipeStream!.Close();
+			_pipeStream.Close();
 			base.Dispose();
 			GC.SuppressFinalize(this);
 		}
 
 		protected void BeginRead()
 		{
-			SpinWait.SpinUntil(() => _pipeStream!.IsConnected);
-			_pipeStream!.BeginRead(_buffer, 0, _buffer.Length, OnPipeRead, null);
+			SpinWait.SpinUntil(() => _pipeStream.IsConnected);
+			_pipeStream.BeginRead(_buffer, 0, _buffer.Length, OnPipeRead, null);
 		}
 
 		private void OnPipeRead(IAsyncResult ar)
 		{
 			Console.Write("Dados chagando...");
 
-			var bytesRead = _pipeStream!.EndRead(ar);
+			var bytesRead = _pipeStream.EndRead(ar);
 			// TODO: Idealmente aqui, trabalhar com ZeroCopy (talvez ArraySegment. shared memory ou ponteiros):
 			var serializedMessage = new byte[bytesRead];
 

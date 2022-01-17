@@ -8,7 +8,7 @@ namespace GameEntities.Messages
 	[Serializable]
 	public class RequestBallColorMessage : BaseItemMessage
 	{
-		private static readonly Random _random = new(DateTime.Now.Millisecond);
+		private static readonly Random _random = new Random(DateTime.Now.Millisecond);
 
 		public override void Invoke(BaseTransporter transport, GameMemory gm)
 		{
